@@ -32,7 +32,9 @@ int leftMotorPin = 6;
 int rightDirectionPin = 7;
 int leftDirectionPin = 8;
 int leftspeed = 255; //setmaximum speed, goes constant speed
-int rightspeed = 255;
+int rightspeed = 250;//makes it drive straight
+
+int distance, duration;
 
 // Create the bluefruit object, either software serial...uncomment these lines
 
@@ -97,7 +99,7 @@ void setup(void)
 void loop(void)
 {
   /*This for calculating the distance objects in cm from the Ultrasonic Sensor*/
-  int duration, distance;    //Adding duration and distance
+  int duration;   //Adding duration and distance
   boolean selfDrive = false;
   /* Wait for new data to arrive */
   uint8_t len = readPacket(&ble, BLE_READPACKET_TIMEOUT);
@@ -121,11 +123,11 @@ void loop(void)
     }
     else if (buttnum == 2 ) { //Sets the Rover's speed to high
       leftspeed = 255;
-      rightspeed = 255;
+      rightspeed = 250;
     }
-    else if(buttnum == 4){
-        forward(255,200);
-      
+    else if (buttnum == 4) {
+      forward(255, 200);
+
     }
     else if (buttnum == 5 && pressed == true) {
       selfDrive = false;
@@ -146,25 +148,7 @@ void loop(void)
     }
 
     while (selfDrive) { //THIS IS IF IT HAS TO TURN AROUND MORE THAN 3 TIMES THE VEHICLE STOPS AND THE USER HAS TO CONTROL IT FROM HERE
-            if( (buttnum == 1)|| (buttnum == 2 && pressed == true)|| (buttnum == 4 && pressed == true)|| (buttnum == 5 && pressed == true)|| (buttnum == 6 && pressed == true)|| (buttnum == 7 && pressed == true)|| (buttnum == 8 && pressed == true) ){
-              selfDrive = false;
-              break;
-            }
-
-
-      //  Serial.println("Self Driving");
-      digitalWrite(triggerPin, HIGH); //triggering the wave(like blinking an LED)
-      delay(10);
-      digitalWrite(triggerPin, LOW);
-      duration = pulseIn(echoPin, HIGH); //a special function for listening and waiting for the wave
-      distance = (duration / 2) / 29.1; //transforming the number to cm(if you want inches, you have to change the 29.1 with a suitable number
-
-      //  Serial.println(distance);
-
-      //This is where the selfdriving Portion Will be coded in
-      //distance = 9;
-      //  Serial.println(passback);
-      //delay(500);
+      \
 
 
       if (distance < 10 && distance > 0) { //If vehicle within 10 cm of something it stops,
@@ -178,83 +162,116 @@ void loop(void)
           Serial.println("Turn Left "); //Delete THis
           ble.println("Turning Left");
           turnLeft(leftspeed, rightspeed);
-          delay(1600);
+          delay(1200);
           stop();
           delay(1600);
           forward(leftspeed, rightspeed);
-          delay(2000);
+          delay(4000);
           stop();
-          delay(1000);
+          delay(1200);
           turnRight(leftspeed, rightspeed);
-          delay(1600);
-          forward(leftspeed,rightspeed);
-          delay(3000);
-          turnRight(leftspeed,rightspeed);
-          delay(1600);
+          delay(1200);
           forward(leftspeed, rightspeed);
-          delay(2000);
+          delay(4000);
+          turnRight(leftspeed, rightspeed);
+          delay(1200);
+          forward(leftspeed, rightspeed);
+          delay(4000);
           turnLeft(leftspeed, rightspeed);
-          delay(1600);
+          delay(1200);
           passback = "Everything is fine";
+          delay(1200);
 
         }
 
 
-        else if (passback.equals("DontTurnLeft")) {
+        else if (passback.equals("DontTurnLeft")) {  //This is pretty much complete so far
+          Serial.println("Turn Right "); //Delete THis
+          ble.println("Turning Right");
           Serial.println("Turn Right "); //Delete THis
           ble.println("Turning Right");
           turnRight(leftspeed, rightspeed);
-          delay(1600);
-          stop();
-          delay(1600);
-          forward(leftspeed, rightspeed);
-          delay(2000);
+          delay(1200);
           stop();
           delay(1000);
-          turnLeft(leftspeed, rightspeed);
-          delay(1600);
           forward(leftspeed, rightspeed);
-          delay(3000);
-          turnLeft(leftspeed, rightspeed);
-          delay(1600);
-          forward(leftspeed, rightspeed);
-          delay(2000);
-          turnRight(leftspeed, rightspeed);
-          delay(1600);
-          
+          delay(1500);
+          if (distance < 20) { //Stop and go around te other way
+            stop();
+            delay(1000);
+            turnLeft(leftspeed, rightspeed);
+            delay(1200);  //may need a stop and delay here
+            if (distance < 30) { //to see if path is clear
+              forward(leftspeed, rightspeed);
+            }
+            else {
+              turnLeft(leftspeed, rightspeed); //path is not clear, so give up and and let user take backover
+              delay(1200);
+              selfDrive = false;
+            }
+
+          } else {
+            delay(2500); //continue going
+            stop();
+            delay(1000);
+            turnLeft(leftspeed, rightspeed);
+            delay(1000);
+            forward(leftspeed, rightspeed);
+            delay(1500);
+            if (distance < 15) {
+              stop();
+              delay(1500);
+              selfDrive = false;
+              break;
+            }
+            turnLeft(leftspeed, rightspeed);
+            delay(1000);
+            forward(leftspeed, rightspeed);
+            delay(1500);
+            if (distance < 15) {
+              if (!(passback.equals("DontTurnRight"))) {
+                stop();
+                delay(1500);
+                selfDrive = false;//
+                break;
+              }
+            }
+            else {
+              forward(leftspeed, rightspeed);
+              delay(2500);
+              turnRight(leftspeed, rightspeed);
+              delay(1000);
+            }
+          }
+
           passback = "Everything is fine";
-        }
-        else if(passback.equals("Reverse")){  //Take this out maybe
-          Serial.println("Reverse");
-          ble.println("Reverse");
-          reverse(leftspeed, rightspeed);
-          delay(3000);
-          stop();
-          delay(3000);//This is where it can exit the for loop
-          selfDrive = false;
-          break;
-          
         }
 
         else {
           Serial.println("Didnt detect any objects on the Sides");
           ble.println("Didn't detect any objects on the Sides");
+          Serial.println("Turn Right "); //Delete THis
+          ble.println("Turning Right");
+          Serial.println("Turn Right "); //Delete THis
+          ble.println("Turning Right");
           turnRight(leftspeed, rightspeed);
-          delay(1600);
+          delay(1200);
           stop();
-          delay(1600);
+          delay(1000);
           forward(leftspeed, rightspeed);
-          delay(2000);
+          delay(4000);
+          stop();
+          delay(1000);
           turnLeft(leftspeed, rightspeed);
-          delay(1600);
+          delay(1000);
           forward(leftspeed, rightspeed);
-          delay(3000);
+          delay(4000);
           turnLeft(leftspeed, rightspeed);
-          delay(1600);
+          delay(1000);
           forward(leftspeed, rightspeed);
-          delay(2000);
+          delay(4000);
           turnRight(leftspeed, rightspeed);
-          delay(1600);
+          delay(1000);
         }
       } //turn on self driving mode. in while loop
 
@@ -262,10 +279,10 @@ void loop(void)
       else {
         Serial.println("Driving");
         ble.println("Driving");
-                    if( (buttnum == 1 )|| (buttnum == 2 && pressed == true)|| (buttnum == 4 && pressed == true)|| (buttnum == 5 && pressed == true)|| (buttnum == 6 && pressed == true)|| (buttnum == 7 && pressed == true)|| (buttnum == 8 && pressed == true) ){
-              selfDrive = false;
-              break;
-            }
+        if ( (buttnum == 1 ) || (buttnum == 2 && pressed == true) || (buttnum == 4 && pressed == true) || (buttnum == 5 && pressed == true) || (buttnum == 6 && pressed == true) || (buttnum == 7 && pressed == true) || (buttnum == 8 && pressed == true) ) {
+          selfDrive = false;
+          break;
+        }
         forward(leftspeed, rightspeed);
       }
 
@@ -326,6 +343,152 @@ void turnRight(char a, char b)
   digitalWrite(rightDirectionPin, LOW);
 }
 
+void navRight() {
+  Serial.println("Turn Right "); //Delete THis
+  ble.println("Turning Right");
+  turnRight(leftspeed, rightspeed);
+  delay(1200);
+  stop();
+  delay(1000);
+  forward(leftspeed, rightspeed);
+  passback = "Everything is fine";
+  if (distance < 10) {
+    stop();
+    if (!(passback.equals("DontTurnLeft"))) {
+      halfNavLeft();
+      delay(1200);
+    }
+    else {
+      halfNavRight();
+    }
+  }
+  else {
+    delay(4000);
+    stop();
+    delay(1000);
+    turnLeft(leftspeed, rightspeed);
+    delay(1000);
+    forward(leftspeed, rightspeed);
+    delay(1000);
+    passback = "Everthing is fine";
+    if (distance < 10) {
+      stop();
+      if (!(passback.equals("DontTurnLeft"))) {
+        navRight();
+      }
+      else {
+        navLeft();
+      }
+    }
+    forward(leftspeed, rightspeed);
+    delay(1000);
+    passback = "Everthing is fine";
+    if (distance < 10) {
+      stop();
+      if (!(passback.equals("DontTurnLeft"))) {
+        navRight();
+      }
+      else {
+        navLeft();
+      }
+    }
+    forward(leftspeed, rightspeed);
+    delay(1000);
+    passback = "Everthing is fine";
+    if (distance < 10) {
+      stop();
+      if (!(passback.equals("DontTurnLeft"))) {
+        navRight();
+      }
+      else {
+        navLeft();
+      }
+    }
+    delay(1000);
+    turnLeft(leftspeed, rightspeed);
+    delay(1000);
+    forward(leftspeed, rightspeed);
+    delay(4000);
+    turnRight(leftspeed, rightspeed);
+    delay(1000);
+  }
+
+}
+void navLeft() {
+  ble.println("Turning Left");
+  turnLeft(leftspeed, rightspeed);
+  delay(1200);
+  stop();
+  delay(1600);
+  forward(leftspeed, rightspeed);
+  delay(4000);
+  stop();
+  delay(1200);
+  turnRight(leftspeed, rightspeed);
+  delay(1200);
+  forward(leftspeed, rightspeed);
+  delay(4000);
+  turnRight(leftspeed, rightspeed);
+  delay(1200);
+  forward(leftspeed, rightspeed);
+  delay(4000);
+  turnLeft(leftspeed, rightspeed);
+  delay(1200);
+  passback = "Everything is fine";
+  delay(1200);
+
+
+}
+
+void halfNavLeft() {
+  ble.println("Turning Left");
+  turnLeft(leftspeed, rightspeed);
+  delay(1200);
+  stop();
+  delay(1600);
+  forward(leftspeed, rightspeed);
+  delay(4000);
+  stop();
+  delay(1200);
+  turnRight(leftspeed, rightspeed);
+  delay(1200);
+  forward(leftspeed, rightspeed);
+  delay(4000);
+  turnRight(leftspeed, rightspeed);
+  delay(1200);
+  forward(leftspeed, rightspeed);
+  delay(4000);
+  turnLeft(leftspeed, rightspeed);
+  delay(1200);
+  passback = "Everything is fine";
+  delay(1200);
+
+}
+void halfNavRight() {
+  ble.println("Turning Right");
+  Serial.println("Turn Right "); //Delete THis
+  ble.println("Turning Right");
+  turnRight(leftspeed, rightspeed);
+  delay(1200);
+  stop();
+  delay(1000);
+  forward(leftspeed, rightspeed);
+  delay(4000);
+  stop();
+  delay(1000);
+  turnLeft(leftspeed, rightspeed);
+  delay(1000);
+  forward(leftspeed, rightspeed);
+  delay(4000);
+  turnLeft(leftspeed, rightspeed);
+  delay(1000);
+  forward(leftspeed, rightspeed);
+  delay(4000);
+  turnRight(leftspeed, rightspeed);
+  delay(1000);
+
+  passback = "Everything is fine";
+}
 
 // function that executes whenever data is received from master
 // this function is registered as an event, see setup()
@@ -334,6 +497,14 @@ int x = 1;
 int LeftDist = 1000;
 int RightDist = 10000;
 void receiveEvent(int howMany) {
+
+  //  Serial.println("Self Driving");
+  digitalWrite(triggerPin, HIGH); //triggering the wave(like blinking an LED)
+  delay(10);
+  digitalWrite(triggerPin, LOW);
+  duration = pulseIn(echoPin, HIGH); //a special function for listening and waiting for the wave
+  distance = (duration / 2) / 29.1; //transforming the number to cm(if you want inches, you have to change the 29.1 with a suitable number
+  Serial.println(distance);
 
   if (old != x) {
 
@@ -359,11 +530,12 @@ void receiveEvent(int howMany) {
       passback = "Dont Go Back";
       delay(250);
     }
-//    else if(RightDist < 15 && LeftDist < 15 && RightDist > 0 && LeftDist > 0){
-//      passback = "Reverse";
-//      delay(250);
-//    }
+    //    else if(RightDist < 15 && LeftDist < 15 && RightDist > 0 && LeftDist > 0){
+    //      passback = "Reverse";
+    //      delay(250);
+    //    }
     else {
+
     }
     ///Serial.println(str + x);// print the integer
   }
