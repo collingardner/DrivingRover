@@ -55,17 +55,8 @@ void loop() {
     Serial.println("LEft distance is ");
   Serial.println(distanceL);
   
-//  //Back Distance
-//  int durationB;//,distance;    //Adding duration and distance
-//  int distanceB;
-//  digitalWrite(triggerPin3, HIGH); //triggering the wave(like blinking an LED)
-//  delay(10);
-//  digitalWrite(triggerPin3, LOW);
-//  
-//  durationB = pulseIn(echoPin3, HIGH); //a special function for listening and waiting for the wave
-//  distanceB= (durationB/2) / 29.1; //transforming the number to cm(if you want inches, you have to change the 29.1 with a suitable number
-//  
 
+//
   Wire.beginTransmission(8); // transmit to device #8
   Wire.write("R");        // sends five bytes
   Wire.write(distanceR);             // sends one byte
@@ -78,11 +69,6 @@ void loop() {
   Wire.endTransmission();
   delay(100);//maybe delete 
 
-//  Wire.beginTransmission(8); // transmit to device #8
-//  Wire.write("B");        // sends five bytes
-//  Wire.write(distanceB);             // sends one byte
-//  Wire.endTransmission();    // stop transmitting
-//
 
   delay(500);
 }
