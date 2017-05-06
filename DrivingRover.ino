@@ -159,28 +159,89 @@ void loop(void)
 
 
         if (passback.equals("DontTurnRight")) {
-          Serial.println("Turn Left "); //Delete THis
-          ble.println("Turning Left");
+            Serial.println("Turn Left "); //Delete THis
+          ble.println("Turning Right");
+          Serial.println("Turn Right "); //Delete THis
+          ble.println("Turning Right");
           turnLeft(leftspeed, rightspeed);
           delay(1200);
           stop();
-          delay(1600);
+          delay(1000);
           forward(leftspeed, rightspeed);
-          delay(4000);
-          stop();
-          delay(1200);
-          turnRight(leftspeed, rightspeed);
-          delay(1200);
-          forward(leftspeed, rightspeed);
-          delay(4000);
-          turnRight(leftspeed, rightspeed);
-          delay(1200);
-          forward(leftspeed, rightspeed);
-          delay(4000);
-          turnLeft(leftspeed, rightspeed);
-          delay(1200);
+          delay(1500);
+          if (distance < 20) { //Stop and go around te other way
+            stop();
+            delay(1000);
+            turnRight(leftspeed, rightspeed);
+            delay(1200);  //may need a stop and delay here
+            if (distance < 30) { //to see if path is clear
+              forward(leftspeed, rightspeed);
+            }
+            else {
+              turnRight(leftspeed, rightspeed); //path is not clear, so give up and and let user take backover
+              delay(1200);
+              selfDrive = false;
+            }
+
+          } else {
+            delay(2500); //continue going
+            stop();
+            delay(1000);
+            turnRight(leftspeed, rightspeed);
+            delay(1000);
+            forward(leftspeed, rightspeed);
+            delay(1500);
+            if (distance < 15) {
+              stop();
+              delay(1500);
+              selfDrive = false;
+              break;
+            }
+            turnRight(leftspeed, rightspeed);
+            delay(1000);
+            forward(leftspeed, rightspeed);
+            delay(1500);
+            if (distance < 15) {
+              if (!(passback.equals("DontTurnRight"))) {
+                stop();
+                delay(1500);
+                selfDrive = false;//
+                break;
+              }
+            }
+            else {
+              forward(leftspeed, rightspeed);
+              delay(2500);
+              turnLeft(leftspeed, rightspeed);
+              delay(1000);
+            }
+          }
+
           passback = "Everything is fine";
-          delay(1200);
+          
+          
+//          Serial.println("Turn Left "); //Delete THis
+//          ble.println("Turning Left");
+//          turnLeft(leftspeed, rightspeed);
+//          delay(1200);
+//          stop();
+//          delay(1600);
+//          forward(leftspeed, rightspeed);
+//          delay(4000);
+//          stop();
+//          delay(1200);
+//          turnRight(leftspeed, rightspeed);
+//          delay(1200);
+//          forward(leftspeed, rightspeed);
+//          delay(4000);
+//          turnRight(leftspeed, rightspeed);
+//          delay(1200);
+//          forward(leftspeed, rightspeed);
+//          delay(4000);
+//          turnLeft(leftspeed, rightspeed);
+//          delay(1200);
+//          passback = "Everything is fine";
+//          delay(1200);
 
         }
 
@@ -248,8 +309,6 @@ void loop(void)
         }
 
         else {
-          Serial.println("Didnt detect any objects on the Sides");
-          ble.println("Didn't detect any objects on the Sides");
           Serial.println("Turn Right "); //Delete THis
           ble.println("Turning Right");
           Serial.println("Turn Right "); //Delete THis
@@ -259,19 +318,81 @@ void loop(void)
           stop();
           delay(1000);
           forward(leftspeed, rightspeed);
-          delay(4000);
-          stop();
-          delay(1000);
-          turnLeft(leftspeed, rightspeed);
-          delay(1000);
-          forward(leftspeed, rightspeed);
-          delay(4000);
-          turnLeft(leftspeed, rightspeed);
-          delay(1000);
-          forward(leftspeed, rightspeed);
-          delay(4000);
-          turnRight(leftspeed, rightspeed);
-          delay(1000);
+          delay(1500);
+          if (distance < 20) { //Stop and go around te other way
+            stop();
+            delay(1000);
+            turnLeft(leftspeed, rightspeed);
+            delay(1200);  //may need a stop and delay here
+            if (distance < 30) { //to see if path is clear
+              forward(leftspeed, rightspeed);
+            }
+            else {
+              turnLeft(leftspeed, rightspeed); //path is not clear, so give up and and let user take backover
+              delay(1200);
+              selfDrive = false;
+            }
+
+          } else {
+            delay(2500); //continue going
+            stop();
+            delay(1000);
+            turnLeft(leftspeed, rightspeed);
+            delay(1000);
+            forward(leftspeed, rightspeed);
+            delay(1500);
+            if (distance < 15) {
+              stop();
+              delay(1500);
+              selfDrive = false;
+              break;
+            }
+            turnLeft(leftspeed, rightspeed);
+            delay(1000);
+            forward(leftspeed, rightspeed);
+            delay(1500);
+            if (distance < 15) {
+              if (!(passback.equals("DontTurnRight"))) {
+                stop();
+                delay(1500);
+                selfDrive = false;//
+                break;
+              }
+            }
+            else {
+              forward(leftspeed, rightspeed);
+              delay(2500);
+              turnRight(leftspeed, rightspeed);
+              delay(1000);
+            }
+          }
+
+          passback = "Everything is fine";
+
+//          Serial.println("Didnt detect any objects on the Sides");
+//          ble.println("Didn't detect any objects on the Sides");
+//          Serial.println("Turn Right "); //Delete THis
+//          ble.println("Turning Right");
+//          Serial.println("Turn Right "); //Delete THis
+//          ble.println("Turning Right");
+//          turnRight(leftspeed, rightspeed);
+//          delay(1200);
+//          stop();
+//          delay(1000);
+//          forward(leftspeed, rightspeed);
+//          delay(4000);
+//          stop();
+//          delay(1000);
+//          turnLeft(leftspeed, rightspeed);
+//          delay(1000);
+//          forward(leftspeed, rightspeed);
+//          delay(4000);
+//          turnLeft(leftspeed, rightspeed);
+//          delay(1000);
+//          forward(leftspeed, rightspeed);
+//          delay(4000);
+//          turnRight(leftspeed, rightspeed);
+//          delay(1000);
         }
       } //turn on self driving mode. in while loop
 
